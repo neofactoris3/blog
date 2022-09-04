@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Nevin's Blog</title>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2022-09-04T22:24:19+05:30</updated>
+ <id>http://localhost:4000</id>
+ <author>
+   <name>Nevin Pezhamattom John</name>
+   <email>neofactor.is3@gmail.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>SSH from the internet without port forwarding</title>
+   <link href="http://localhost:4000/ssh-from-the-internet"/>
+   <updated>2022-07-01T00:00:00+05:30</updated>
+   <id>http://localhost:4000/ssh-from-the-internet</id>
+   <content type="html">&lt;p&gt;If you do not want to open ports on your network but want to ssh from the internet you could use Cloudflare Access to achieve this.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/cloudflare0.png&quot; alt=&quot;Cloudflare Access&quot; title=&quot;Zero Trust&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;create-app-on-cloudflare-access&quot;&gt;create App on Cloudflare Access&lt;/h2&gt;
+
+&lt;p&gt;Head to the Zero Trust dashboard to create a new application. Select the Applications page from the sidebar. Click &lt;strong&gt;Add application&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Select &lt;em&gt;Self Hosted&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/cloudflare1.png&quot; alt=&quot;Cloudflare Access&quot; title=&quot;Add an application&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Enter the &lt;em&gt;Application name&lt;/em&gt; and add the subdomain:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/cloudflare2.png&quot; alt=&quot;Cloudflare Access&quot; title=&quot;Application name&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Edit the App Policy to allow only the email address that you would like to authenticate:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/cloudflare3.png&quot; alt=&quot;Cloudflare Access&quot; title=&quot;Restrict to specific emails&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;That’s it!&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;install-cloudflared-on-the-origin-server&quot;&gt;install cloudflared on the origin server&lt;/h2&gt;
+&lt;p&gt;Cloudflare Tunnel creates a secure, outbound-only, connection between the origin server and Cloudflare’s network. With this, you can lock down any externally exposed points of ingress which means no open ports. So, now we want to configure the tunnel on the origin server.&lt;/p&gt;
+
+&lt;p&gt;For that, grab the package from &lt;a href=&quot;https://github.com/cloudflare/cloudflared/releases&quot; target=&quot;_blank&quot;&gt;Github&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Install the downloaded deb (in case if it is a Debian derivative):&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo dpkg -i ./cloudflared.deb&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Run the following command on the server to authenticate cloudflared into your Cloudflare account.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudflared tunnel login&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;cloudflared&lt;/em&gt; on the headless server will let you copy the URL from the command-line output so that you could visit the URL in a browser on any machine and authenticate.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-the-tunnel&quot;&gt;creating the tunnel&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudflared tunnel create &amp;lt;tunnel name&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This will create a tunnel for you and output the relevant details to proceed to the next step:&lt;/p&gt;
+
+&lt;p&gt;Tunnel credentials written to &lt;em&gt;/home/user/.cloudflared/ce347-ewr-rbweb-b1b.json&lt;/em&gt;. &lt;em&gt;cloudflared&lt;/em&gt; chose this file based on where your origin certificate was found. Keep this file secret. To revoke these credentials, delete the tunnel.&lt;/p&gt;
+
+&lt;p&gt;Created tunnel &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;tunnel name&amp;gt; with id &amp;lt;unique id&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Create a YAML file that cloudflared can reach. By default, cloudflared will look for the file in the same folder where cloudflared has been installed.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nano ~/.cloudflared/config.yml&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Next, configure the Tunnel, replacing the example ID below with the unique ID of the Tunnel created above. Additionally, replace the hostname in this example with the hostname of the application configured with Cloudflare Access.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;tunnel&lt;/em&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;6ff42ae2-id-demo-unique-31cid1551ef&lt;/code&gt;&lt;br /&gt;
+&lt;em&gt;credentials-file&lt;/em&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/user/.cloudflared/6ff42ae2-765d-4adf-8112-31c55c1551ef.json&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;ingress:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;hostname&lt;/em&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh.yourdomain.com&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;service: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh://localhost:&amp;lt;ssh port&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;service: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http_status:404&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can now create a DNS record that will route traffic to this Tunnel. Multiple DNS records can point to a single Tunnel and will send traffic to the service configured as long as the hostname is defined with an ingress rule.&lt;/p&gt;
+
+&lt;p&gt;Navigate to &lt;a href=&quot;https://dash.cloudflare.com&quot;&gt;https://dash.cloudflare.com&lt;/a&gt; and choose the hostname where you want to create a Tunnel. This should match the hostname of the Access policy. Click &lt;strong&gt;+ Add record&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Select &lt;strong&gt;CNAME&lt;/strong&gt; as the record type. For the target, input the ID of your Tunnel followed by cfargotunnel.com. In this example, the target would be:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&amp;lt;unique id&amp;gt;&lt;/strong&gt;&lt;em&gt;.cfargotunnel.com&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;run-cloudflared-as-a-service&quot;&gt;run cloudflared as a service&lt;/h2&gt;
+
+&lt;p&gt;I use linux so, in this article I will explain how to do it via systemctl.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo mv /home/user/.cloudflared/config.yml /etc/cloudflared/&lt;/code&gt;&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudflared service install&lt;/code&gt;&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo systemctl enable cloudflared&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;finally…&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo systemctl start cloudflared&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;ssh-ing-from-a-browser-on-the-client&quot;&gt;SSH-ing from a browser on the client&lt;/h2&gt;
+
+&lt;p&gt;Cloudflare can render an SSH client in your browser.&lt;/p&gt;
+
+&lt;p&gt;To enable, navigate to the application page of the Access section in the Zero Trust dashboard. Click &lt;strong&gt;Edit&lt;/strong&gt; and select the Settings tab. In the &lt;strong&gt;&lt;em&gt;cloudflared settings card&lt;/em&gt;&lt;/strong&gt;, select &lt;strong&gt;&lt;em&gt;SSH&lt;/em&gt;&lt;/strong&gt; from the &lt;strong&gt;&lt;em&gt;Browser Rendering&lt;/em&gt;&lt;/strong&gt; drop-down menu.&lt;/p&gt;
+
+&lt;p&gt;Once enabled, when users authenticate and visit the URL of the application, Cloudflare will render a terminal in their browser.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/cloudflare4.png&quot; alt=&quot;Cloudflare Access&quot; title=&quot;SSH from browser terminal&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;thank-you&quot;&gt;&lt;strong&gt;&lt;em&gt;Thank you!&lt;/em&gt;&lt;/strong&gt;&lt;/h3&gt;
+</content>
+ </entry>
+ 
+
+</feed>
