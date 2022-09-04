@@ -1,0 +1,22 @@
+# Setup
+title:               Nevin's Blog
+tagline:             'lets talk tech!'
+description:         "A little space on the internet for <a href='https://nevinpjohn.in' target='_blank'>Nevin</a> to scribble tech stuff and hopefully more if time permits! Made by <a href='https://twitter.com/nevinjohn13' target='_blank'>@nevinjohn13</a>."
+url:                 https://blog.nevinpjohn.in
+baseurl:             ''
+paginate:            5
+permalink:           pretty
+
+# About/contact
+author:
+  name:              Nevin Pezhamattom John
+  url:               https://twitter.com/nevinjohn13
+  email:             neofactor.is3@gmail.com
+
+# Gems
+plugins:
+  - jekyll-paginate
+
+# Custom vars
+version:             1.1.0
+google_analytics_id: #UA-XXXX-Y
